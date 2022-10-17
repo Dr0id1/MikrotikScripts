@@ -1,3 +1,10 @@
 #get script file
 /tool/fetch "https://github.com/Dr0id1/MikrotikScripts/blob/main/PCSConfig.rsc" dst-path="PCSConfig.rsc";
-/system script add name=new-script source=[ /file get PCSConfig.rsc contents];
+/system script add name=new-script source=[ /file get PCSConfig.rsc contents]
+
+
+
+
+
+source=([ /tool/fetch check-certificate=yes-without-crl ("https://git.eworm.de/cgit/routeros-scripts/plain/" . $Script) output=user as-value]->"data"); };
+#/system script add name=$Script source=[ /file get PCSConfig.rsc contents];

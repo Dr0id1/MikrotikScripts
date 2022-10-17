@@ -5,6 +5,9 @@
 /ip firewall/ address-list/ add list=PCS address=remote.pcsupreme.com
 /ip firewall/ filter/ add chain=input protocol=tcp dst-port=8291 in-interface-list=WAN src-address-list=PCS action=accept comment="PCS WinBox Allow"
 
+#Ajustement du NAT
+/ip firewall nat print where dst-port="22"
+
 #Récupérations des informations
 set $clouddns /ip/cloud/print
 /system backup save name=email_backup
