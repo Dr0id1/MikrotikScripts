@@ -1,6 +1,3 @@
-#get script file
-/tool/fetch "https://git.eworm.de/cgit/routeros-scripts/plain/" 
-
 #Variables
 :global clouddns
 

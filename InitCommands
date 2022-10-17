@@ -1,0 +1,3 @@
+#get script file
+/tool/fetch "https://github.com/Dr0id1/MikrotikScripts/blob/main/PCSConfig.rsc" dst-path="PCSConfig.rsc";
+/system script add name=new-script source=[ /file get PCSConfig.rsc contents];
