@@ -1,15 +1,55 @@
 #Variables
-:global clouddns
+:local clouddns
 
-#Ajustement du firewall pour PCS
-/ip firewall/ address-list/ add list=PCS address=remote.pcsupreme.com
-/ip firewall/ filter/ add chain=input protocol=tcp dst-port=8291 in-interface-list=WAN src-address-list=PCS action=accept comment="PCS WinBox Allow"
+#STMP Variables
+:local SendFrom "smtp@pcsupreme.com";
+:local PasswordMail "smtp2016!!!";
+:local SmtpServer [:resolve "mail.pcsupreme.com"];
+:local UserName "maxime@pcsupreme.com";
+:local SmtpPort 465;
+:local UseTLS "yes";
 
-#Ajustement du NAT
-/ip firewall nat print where dst-port="22"
+# Création interface list WAN
+/interface/list/add name=WAN
+/interface/list/member/add interface=ether1 list=WAN
 
-#Récupérations des informations
-set $clouddns /ip/cloud/print
-/system backup save name=email_backup
-/tool e-mail send file=email_backup.backup to="me@test.com" body="See attached file" \
-   subject="$[/system identity get name] $[/system clock get time] $[/system clock get date] Backup")
+#Création interface list LAN
+/interface/list/add name=LAN
+/interface/list/member/add interface=ether2 list=LAN
+
+#Création du Firewall
+/ip firewall filter
+add action=accept chain=input comment="accept established,related,untracked" connection-state=established,related,untracked
+add chain=input protocol=tcp dst-port=8291 in-interface-list=WAN src-address-list=PCS action=accept comment="PCS WinBox Allow"
+add chain=input protocol=tcp dst-port=22 in-interface-list=WAN src-address-list=PCS action=accept comment="PCS SSH Allow"
+add action=drop chain=input comment="drop invalid" connection-state=invalid
+add action=accept chain=input comment="accept ICMP" protocol=icmp
+add action=drop chain=input comment="drop all not coming from LAN" in-interface-list=!LAN
+add action=accept chain=forward comment="accept established,related, untracked" connection-state=established,related,untracked
+add action=drop chain=forward comment="drop invalid" connection-state=invalid
+add action=accept chain=forward comment="accept in ipsec policy" ipsec-policy=in,ipsec
+add action=accept chain=forward comment="accept out ipsec policy" ipsec-policy=out,ipsec
+add action=drop chain=forward comment="drop all from WAN not DSTNATed" connection-nat-state=!dstnat in-interface-list=WAN
+
+#Désactivation des services
+/ip/service/disable api
+/ip/service/disable api-ssl
+/ip/service/disable ftp
+/ip/service/disable ssh
+/ip/service/disable telnet
+/ip/service/disable www
+/ip/service/disable www-ssl
+
+#Configuration DNS
+/ip/dns/set servers=1.1.1.1,8.8.8.8 allow-remote-requests=yes
+
+#Ajustement Horloge
+/system/clock/set time-zone-autodetect=no
+/system/clock/set time-zone-name=America/Montreal
+
+#Activation Cloud DNS
+/ip/cloud/set ddns-enabled=yes
+/ip/cloud/force-update
+
+#Récupérations des informations DDNS
+:set $clouddns /ip/cloud/print
