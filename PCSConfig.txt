@@ -47,6 +47,10 @@ add action=drop chain=forward comment="drop all from WAN not DSTNATed" connectio
 /system/clock/set time-zone-autodetect=no
 /system/clock/set time-zone-name=America/Montreal
 
+#Configuration Client NTP
+/system/ntp/client/set enabled=yes
+/system/ntp/client/set servers=0.ca.pool.ntp.org
+
 #Activation Cloud DNS
 /ip/cloud/set ddns-enabled=yes
 /ip/cloud/force-update
